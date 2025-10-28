@@ -1,0 +1,209 @@
+/* Modal Styles */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 9999;
+  overflow: hidden;
+}
+
+.modal {
+  width: clamp(560px, 68vw, 920px);
+  height: min(84vh, 760px);
+  min-height: 440px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.modalFullscreen {
+  width: 100vw;
+  height: 100vh;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.modalHead {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: #fff;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+}
+
+.modalFullscreen .modalHead {
+  padding: 16px 20px;
+}
+
+.modalBody {
+  flex: 1;
+  overflow: auto;
+  padding: 14px 16px;
+  display: grid;
+  gap: 12px;
+  overscroll-behavior: contain;
+  position: relative;
+}
+
+.modalFullscreen .modalBody {
+  padding: 16px 20px;
+}
+
+.modalFoot {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  background: #fff;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 10px 16px;
+}
+
+.modalFullscreen .modalFoot {
+  padding: 12px 20px;
+}
+
+/* Search Sticky Section */
+.searchSticky {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: #fff;
+  padding: 8px 0 10px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+/* Dropdown */
+.dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 3;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 6px;
+  max-height: min(38vh, 260px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+  will-change: transform;
+  list-style: none;
+  margin: 0;
+}
+
+.dropdownItem {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: #fff;
+  border: none;
+  box-shadow: none;
+  outline: none;
+  line-height: 1.2;
+  cursor: pointer;
+  text-align: left;
+}
+
+.dropdownItem:hover {
+  background: #f8fafc;
+}
+
+.colorIndicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  flex: 0 0 auto;
+}
+
+.dropdownLabel {
+  flex: 1;
+  color: #0b1220;
+  font-size: 14px;
+}
+
+.dropdownBadge {
+  opacity: 0.6;
+  font-size: 12px;
+}
+
+/* Form Sections */
+.formSection {
+  display: grid;
+  gap: 12px;
+}
+
+.formRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.formLabel {
+  font-size: 12px;
+  opacity: 0.8;
+  min-width: 140px;
+}
+
+.colorPickerWrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.colorPicker {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+/* Template Plan */
+.templatePlan {
+  display: grid;
+  gap: 8px;
+}
+
+.templateStep {
+  display: grid;
+  grid-template-columns: 36px 1fr 110px 180px;
+  align-items: center;
+  gap: 8px;
+}
+
+.stepNumber {
+  font-weight: 600;
+}
+
+.stepInfo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stepDuration {
+  font-size: 12px;
+  opacity: 0.8;
+}

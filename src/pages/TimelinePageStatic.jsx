@@ -1,9 +1,20 @@
-import React from "react";
+import React, { use, useEffect } from "react";
 import {
   VerticalTimeline,
   VerticalTimelineElement,
 } from "react-vertical-timeline-component";
 import "react-vertical-timeline-component/style.min.css";
+
+// karim imports
+import { Timeline } from '@progress/kendo-react-layout';
+import { useImmediateInheritState } from "@progress/kendo-react-common";
+import { Line } from 'react-chartjs-2';
+import { Chart as ChartJS, registerables } from 'chart.js';
+import Annotation from "chartjs-plugin-annotation";
+ChartJS.register(...registerables);
+ChartJS.register(Annotation);
+
+
 
 /* ==== Icônes SVG inline (zéro dépendance) ==== */
 const IconPlus = (props) => (
@@ -19,6 +30,46 @@ const IconClose = (props) => (
 );
 
 export default function TimelinePageStatic() {
+  const [weightModalOpen, setWeightModalOpen] = React.useState(false);
+  const [weightValue, setWeightValue] = React.useState("");
+  const [weightDate, setWeightDate] = React.useState(new Date().toISOString().slice(0, 10));
+  const [chartData, setChartData] = React.useState({ labels: [], datasets: [] });
+  const [forceRerender, setForceRerender] = React.useState(0);
+  const [chartOptions, setChartOptions] = React.useState({
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      annotation: {
+        annotations: {
+
+        }
+      }
+    }
+  });
+
+
+  // chart data
+  //const [chartData, setChartData] = React.useState({ labels: [], datasets: [], plugins: [] });
+  const chartDataExample = {
+    labels: [],
+    datasets: [
+      {
+        label: 'Poids',
+        data: [],
+        backgroundColor: 'rgba(75, 192, 192, 0.6)',
+        borderColor: 'rgba(75, 192, 192, 1)',
+        borderWidth: 1,
+      },
+    ]
+  };
+
+  useEffect(() => {
+    setChartData(chartDataExample);
+    setChartOptions(chartOptions);
+  }, []);
+
+
+
   // ===== Helpers
   const ymdLocal = () =>
     new Date(Date.now() - new Date().getTimezoneOffset() * 60000)
@@ -36,11 +87,15 @@ export default function TimelinePageStatic() {
   };
 
   const cmpByEventDateDesc = (a, b) => {
-    const da = String(a?.event_date ?? a?.date ?? "");
-    const db = String(b?.event_date ?? b?.date ?? "");
-    if (da < db) return 1;
-    if (da > db) return -1;
-    return 0;
+    const da = a?.event_date ?? a?.date;
+    const db = b?.event_date ?? b?.date;
+    
+    // Convert to timestamps for comparison
+    const timeA = da instanceof Date ? da.getTime() : new Date(da).getTime();
+    const timeB = db instanceof Date ? db.getTime() : new Date(db).getTime();
+    
+    // Sort descending (newest first)
+    return timeB - timeA;
   };
 
   const cryptoRandomId = () =>
@@ -186,28 +241,28 @@ export default function TimelinePageStatic() {
   const [chartsOpen, setChartsOpen] = React.useState(false);
 
   // ====== State Timeline (évènements)
-  const [timelineEvents, setTimelineEvents] = React.useState(() => [
+  const [timelineEvents, setTimelineEvents] = React.useState([
     // 2024
-    { id: cryptoRandomId(), type: "etape", title: "Consultation initiale", date: "2024-11-15", color: "#2563EB" },
-    { id: cryptoRandomId(), type: "card", title: "Compte-rendu initial", description: "RAS notable. Orientation vers analyses complémentaires.", date: "2024-11-16", color: "#0EA5E9" },
+    { id: cryptoRandomId(), type: "etape", title: "Consultation initiale", date: new Date("2024-11-15"), color: "#2563EB" },
+    { id: cryptoRandomId(), type: "card", title: "Compte-rendu initial", description: "RAS notable. Orientation vers analyses complémentaires.", date: new Date("2024-11-16"), color: "#0EA5E9" },
 
     // 2025
-    { id: cryptoRandomId(), type: "etape", title: "Bilan sanguin", date: "2025-01-05", color: "#DC2626" },
-    { id: cryptoRandomId(), type: "etape", title: "Échographie abdominale", date: "2025-01-08", color: "#0EA5E9" },
-    { id: cryptoRandomId(), type: "card", title: "Analyse des résultats", description: "Légère anomalie détectée, recommandation d’IRM.", date: "2025-01-10", color: "#22C55E" },
-    { id: cryptoRandomId(), type: "etape", title: "IRM", date: "2025-01-12", color: "#7C3AED" },
-    { id: cryptoRandomId(), type: "card", title: "Compte-rendu IRM", description: "IRM satisfaisante. Poursuite du suivi.", date: "2025-01-14", color: "#0EA5E9", images: [{ id: cryptoRandomId(), url: "https://picsum.photos/seed/irm/400/220" }] },
+    { id: cryptoRandomId(), type: "etape", title: "Bilan sanguin", date: new Date("2025-01-05"), color: "#DC2626" },
+    { id: cryptoRandomId(), type: "etape", title: "Échographie abdominale", date: new Date("2025-01-08"), color: "#0EA5E9" },
+    { id: cryptoRandomId(), type: "card", title: "Analyse des résultats", description: "Légère anomalie détectée, recommandation d’IRM.", date: new Date("2025-01-10"), color: "#22C55E" },
+    { id: cryptoRandomId(), type: "etape", title: "IRM", date: new Date("2025-01-12"), color: "#7C3AED" },
+    { id: cryptoRandomId(), type: "card", title: "Compte-rendu IRM", description: "IRM satisfaisante. Poursuite du suivi.", date: new Date("2025-01-14"), color: "#0EA5E9", images: [{ id: cryptoRandomId(), url: "https://picsum.photos/seed/irm/400/220" }] },
 
-    { id: cryptoRandomId(), type: "etape", title: "Vaccination rappel", date: "2025-02-02", color: "#14B8A6" },
-    { id: cryptoRandomId(), type: "etape", title: "Contrôle clinique", date: "2025-02-10", color: "#F59E0B" },
+    { id: cryptoRandomId(), type: "etape", title: "Vaccination rappel", date: new Date("2025-02-02"), color: "#14B8A6" },
+    { id: cryptoRandomId(), type: "etape", title: "Contrôle clinique", date: new Date("2025-02-10"), color: "#F59E0B" },
 
-    { id: cryptoRandomId(), type: "etape", title: "Hospitalisation (programmée)", date: "2025-03-01", color: "#EF4444" },
-    { id: cryptoRandomId(), type: "card", title: "Note de service", description: "Intervention réalisée sans complication. Surveillance standard.", date: "2025-03-02", color: "#0EA5E9", images: [{ id: cryptoRandomId(), url: "https://picsum.photos/seed/room/400/220" }] },
-    { id: cryptoRandomId(), type: "etape", title: "Sortie", date: "2025-03-04", color: "#8B5CF6" },
+    { id: cryptoRandomId(), type: "etape", title: "Hospitalisation (programmée)", date: new Date("2025-03-01"), color: "#EF4444" },
+    { id: cryptoRandomId(), type: "card", title: "Note de service", description: "Intervention réalisée sans complication. Surveillance standard.", date: new Date("2025-03-02"), color: "#0EA5E9", images: [{ id: cryptoRandomId(), url: "https://picsum.photos/seed/room/400/220" }] },
+    { id: cryptoRandomId(), type: "etape", title: "Sortie", date: new Date("2025-03-04"), color: "#8B5CF6" },
 
-    { id: cryptoRandomId(), type: "etape", title: "Suivi 1m", date: "2025-04-04", color: "#3B82F6" },
-    { id: cryptoRandomId(), type: "card", title: "Compte-rendu suivi", description: "Bon rétablissement, poursuite du plan de suivi.", date: "2025-04-05", color: "#0EA5E9" },
-    { id: cryptoRandomId(), type: "etape", title: "Suivi 3m", date: "2025-06-30", color: "#0891B2" },
+    { id: cryptoRandomId(), type: "etape", title: "Suivi 1m", date: new Date("2025-04-04"), color: "#3B82F6" },
+    { id: cryptoRandomId(), type: "card", title: "Compte-rendu suivi", description: "Bon rétablissement, poursuite du plan de suivi.", date: new Date("2025-04-05"), color: "#0EA5E9" },
+    { id: cryptoRandomId(), type: "etape", title: "Suivi 3m", date: new Date("2025-06-30"), color: "#0891B2" },
   ]);
 
   // ====== State modale Add
@@ -271,6 +326,7 @@ export default function TimelinePageStatic() {
   );
 
   React.useEffect(() => {
+
     computeMatches(searchQuery);
   }, [searchQuery, computeMatches]);
 
@@ -372,30 +428,49 @@ export default function TimelinePageStatic() {
           id: cryptoRandomId(),
           type: "etape",
           title: st.label,
-          date: st.date || addDate,
+          date: new Date(st.date || addDate),
           color: st.color,
         }));
-        setTimelineEvents((prev) => [...prev, ...toPush]);
+        setTimelineEvents((prev) => {
+          const updated = [...prev, ...toPush];
+          console.log("Added template events:", toPush);
+          console.log("All events after add:", updated);
+          return updated.sort(cmpByEventDateDesc);
+        });
       } else if (selectedKind === "card") {
         if (!addTitle.trim() || !addDate) return;
-        setTimelineEvents((prev) => [
-          ...prev,
-          {
-            id: cryptoRandomId(),
-            type: "card",
-            title: addTitle.trim(),
-            description: addDescription?.trim() || "",
-            date: addDate,
-            color: addColor,
-          },
-        ]);
+
+        const newCard = {
+          id: cryptoRandomId(),
+          type: "card",
+          title: addTitle.trim(),
+          description: addDescription?.trim() || "",
+          date: new Date(addDate),
+          color: addColor,
+        };
+        console.log("Adding card:", newCard);
+        setTimelineEvents((prev) => {
+          const updated = [...prev, newCard];
+          console.log("All events after add:", updated);
+          return updated.sort(cmpByEventDateDesc);
+        });
       } else {
         // étape simple (par défaut)
         if (!addTitle.trim() || !addDate) return;
-        setTimelineEvents((prev) => [
-          ...prev,
-          { id: cryptoRandomId(), type: "etape", title: addTitle.trim(), date: addDate, color: addColor },
-        ]);
+
+        const newEtape = {
+          id: cryptoRandomId(),
+          type: "etape",
+          title: addTitle.trim(),
+          date: new Date(addDate),
+          color: addColor,
+        };
+        console.log("Adding etape:", newEtape);
+        setTimelineEvents((prev) => {
+          const updated = [...prev, newEtape];
+          console.log("All events after add:", updated);
+          return updated.sort(cmpByEventDateDesc);
+        });
       }
 
       // Reset form
@@ -421,6 +496,11 @@ export default function TimelinePageStatic() {
     setEditOpen(true);
   };
 
+  useEffect(() => {
+    console.log("events changed:", timelineEvents);
+    setForceRerender((f) => f + 1);
+  }, [timelineEvents]);
+
   const saveEdit = () => {
     if (!editTitle.trim()) return;
     setTimelineEvents((prev) =>
@@ -436,7 +516,101 @@ export default function TimelinePageStatic() {
     setTimelineEvents((prev) => prev.filter((e) => e.id !== id));
   };
 
-  const onToggleCharts = () => setChartsOpen((v) => !v);
+  const onToggleCharts = () => setChartsOpen(!chartsOpen);
+
+  // Weight Modal Handlers
+  const handleOpenWeightModal = () => {
+    setWeightValue("");
+    setWeightDate(ymdLocal());
+    setWeightModalOpen(true);
+  };
+
+  const handleCloseWeightModal = () => {
+    setWeightModalOpen(false);
+    setWeightValue("");
+    setWeightDate(ymdLocal());
+  };
+
+  const handleAddWeight = () => {
+    if (!weightValue.trim() || !weightDate) return;
+
+    // Here you can add the logic to save the weight data
+    console.log("Adding weight:", {
+      weight: parseFloat(weightValue),
+      date: weightDate,
+      timestamp: new Date().toISOString()
+    });
+
+    // Here you can add the logic to update the chart data
+    setChartData((prevData) => {
+
+      let newLabels = [...prevData.labels];
+      let newData = [...(prevData.datasets[0]?.data || [])];
+      // check if not same date
+      if (prevData.labels.includes(weightDate)) {
+        // update existing value
+        const index = prevData.labels.indexOf(weightDate);
+        newData[index] = parseFloat(weightValue);
+      } else {
+        newLabels.push(weightDate);
+        newData.push(parseFloat(weightValue));
+      }
+
+      return {
+        ...prevData,
+        labels: newLabels,
+        datasets: [
+          {
+            ...prevData.datasets[0],
+            data: newData
+          }
+        ]
+      };
+    });
+
+    // add annotation in same point
+    setChartOptions((prevOptions) => {
+      const newAnnotation = {
+        type: 'line',
+        xMin: weightDate,
+        xMax: weightDate
+      };
+
+      console.log("Adding annotation:", {
+        ...prevOptions,
+        plugins: {
+          ...prevOptions.plugins,
+          annotation: {
+            ...prevOptions.plugins.annotation,
+            annotations: {
+              ...prevOptions.plugins.annotation.annotations, // keep existing annotations
+              [weightDate]: newAnnotation, // add new annotation
+            },
+          },
+        },
+      });
+
+      return {
+        ...prevOptions,
+        plugins: {
+          ...prevOptions.plugins,
+          annotation: {
+            ...prevOptions.plugins.annotation,
+            annotations: {
+              ...prevOptions.plugins.annotation.annotations, // keep existing annotations
+              [weightDate]: newAnnotation, // add new annotation
+            },
+          },
+        },
+      };
+    });
+
+    // Close modal and reset
+    handleCloseWeightModal();
+
+    // You could also add this to state or send to API
+    // For now, just logging it
+  };
 
   // ===== Rendu
   return (
@@ -445,6 +619,7 @@ export default function TimelinePageStatic() {
         padding: 16,
         background: "#F8FAFC",
         minHeight: "100vh",
+        overflowY: "auto",
         fontFamily:
           "Inter, system-ui, Segoe UI, Roboto, Helvetica, Arial, Apple Color Emoji, Segoe UI Emoji",
       }}
@@ -491,191 +666,17 @@ export default function TimelinePageStatic() {
             ["--tl-line"]: "#93C5FD",
           }}
         >
-          <VerticalTimeline
-            layout="2-columns"
-            animate
-            lineColor="var(--tl-line, #93C5FD)"
-            className="vtl--inside"
-          >
-            {(() => {
-              const nodes = [];
-              let lastYear = null;
 
-              (timelineEvents || [])
-                .slice()
-                .sort(cmpByEventDateDesc)
-                .forEach((ev, idx) => {
-                  const dateStr = String(ev?.event_date ?? ev?.date ?? "");
-                  const year = dateStr ? dateStr.slice(0, 4) : "";
-                  const tone = toneForEvent(ev);
-
-                  // Drapeau d'année
-                  if (year && year !== lastYear) {
-                    nodes.push(
-                      <VerticalTimelineElement
-                        key={`year-${year}-${idx}`}
-                        icon={<strong style={{ fontSize: 12, lineHeight: 1 }}>{year}</strong>}
-                        dateClassName="TLDateBlack"
-                        contentStyle={{ display: "none", padding: 0, background: "transparent", boxShadow: "none" }}
-                        contentArrowStyle={{ display: "none" }}
-                        iconStyle={{
-                          background: tone.solid,
-                          color: "#fff",
-                          width: 40,
-                          height: 40,
-                          marginLeft: -20,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          boxShadow: `0 8px 18px ${hexToRgba(tone.solid, 0.32)}, inset 0 0 0 2px ${hexToRgba("#FFFFFF", 0.16)}`,
-                        }}
-                        className="YearFlagEl"
-                      />
-                    );
-                    lastYear = year;
-                  }
-
-                  const isEtape = String(ev?.type || "").toLowerCase() === "etape";
-
-                  if (isEtape) {
-                    // Étape (badge centré)
-                    nodes.push(
-                      <VerticalTimelineElement
-                        key={`ev-${ev?.id ?? idx}-step`}
-                        className="StepFlagEl"
-                        date={dateStr}
-                        dateClassName="TLDateBlack"
-                        contentStyle={{
-                          background: tone.bg,
-                          color: "#0B1220",
-                          padding: "10px 14px",
-                          borderRadius: 10,
-                          display: "inline-block",
-                          border: `1px solid ${hexToRgba(tone.solid, 0.4)}`,
-                          boxShadow: `0 8px 20px ${hexToRgba(tone.solid, 0.18)}`,
-                          fontWeight: 600,
-                        }}
-                        contentArrowStyle={{ display: "none" }}
-                        icon={<span aria-hidden="true" />}
-                        iconStyle={{
-                          background: tone.solid,
-                          color: "transparent",
-                          width: 10,
-                          height: 10,
-                          marginLeft: -5,
-                          borderRadius: 999,
-                          border: "2px solid #fff",
-                          boxShadow: `0 2px 6px ${hexToRgba(tone.solid, 0.36)}`,
-                        }}
-                      >
-                        <div
-                          className="StepFlagInner"
-                          style={{ position: "relative", display: "inline-flex", alignItems: "center", gap: 8 }}
-                        >
-                          <span>{ev?.title || ev?.label || "Étape"}</span>
-                          {!readOnly && (
-                            <div className="TLFlagActions">
-                              <button type="button" className="IconBtn" title="Éditer" onClick={() => openEdit(ev)}>
-                                ✎
-                              </button>
-                              <button type="button" className="IconBtn" title="Supprimer" onClick={() => doDelete(ev?.id)}>
-                                🗑
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      </VerticalTimelineElement>
-                    );
-                  } else {
-                    // Carte latérale
-                    nodes.push(
-                      <VerticalTimelineElement
-                        key={`ev-${ev?.id ?? idx}`}
-                        date={dateStr}
-                        dateClassName="TLDateBlack"
-                        contentStyle={{
-                          background: tone.bg,
-                          color: "#0B1220",
-                          borderLeft: `5px solid ${tone.solid}`,
-                          boxShadow: `0 12px 26px ${hexToRgba(tone.solid, 0.18)}`,
-                          borderRadius: 14,
-                          width: "calc(50% - 10px)",
-                        }}
-                        contentArrowStyle={{ borderRight: `7px solid ${tone.bg}` }}
-                        icon={<span aria-hidden="true" />}
-                        iconStyle={{
-                          background: tone.solid,
-                          color: "transparent",
-                          width: 10,
-                          height: 10,
-                          marginLeft: -5,
-                          borderRadius: 999,
-                          border: "2px solid #fff",
-                          boxShadow: `0 2px 6px ${hexToRgba(tone.solid, 0.36)}`,
-                        }}
-                      >
-                        <header
-                          className="TLCardHeader"
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "space-between",
-                            gap: 8,
-                            marginBottom: 6,
-                          }}
-                        >
-                          <h4 className="TLCardTitle" style={{ margin: 0, fontWeight: 700 }}>
-                            {ev?.title || ev?.label || "Évènement"}
-                          </h4>
-                          {!readOnly && (
-                            <div className="TLCardActions" style={{ display: "flex", gap: 8 }}>
-                              <button type="button" className="IconBtn" title="Éditer" onClick={() => openEdit(ev)}>
-                                ✎
-                              </button>
-                              <button type="button" className="IconBtn" title="Supprimer" onClick={() => doDelete(ev?.id)}>
-                                🗑
-                              </button>
-                            </div>
-                          )}
-                        </header>
-
-                        {ev?.description && (
-                          <p style={{ whiteSpace: "pre-wrap", marginTop: 0, color: "#334155" }}>{ev.description}</p>
-                        )}
-
-                        {Array.isArray(ev?.images) && ev.images.length > 0 && (
-                          <div
-                            style={{
-                              display: "grid",
-                              gridTemplateColumns: "repeat(auto-fill, minmax(120px, 1fr))",
-                              gap: 8,
-                              marginTop: 8,
-                            }}
-                          >
-                            {ev.images.map((img) => (
-                              <img
-                                key={img.id || img.url}
-                                src={img.url}
-                                alt=""
-                                style={{
-                                  width: "100%",
-                                  height: 120,
-                                  objectFit: "cover",
-                                  borderRadius: 8,
-                                  display: "block",
-                                }}
-                              />
-                            ))}
-                          </div>
-                        )}
-                      </VerticalTimelineElement>
-                    );
-                  }
-                });
-
-              return nodes;
-            })()}
-          </VerticalTimeline>
+          <div forceRerender={forceRerender} style={{ padding: forceRerender % 2 === 0 ? '16px' : '8px', boxSizing: 'border-box' }}>
+            <Timeline
+            events={timelineEvents}
+            forceRerender={forceRerender}
+            alterMode={true}
+            collapsibleEvents={true}
+            onChange={null} // here use to toggle boxes
+            onActionClick={null}
+          />
+          </div>
         </div>
 
         {/* ===== Modale ADD ===== */}
@@ -687,13 +688,15 @@ export default function TimelinePageStatic() {
             style={{
               position: "fixed",
               inset: 0,
-              background: "rgba(15,23,42,.50)",
+              background: "rgba(15, 23, 42, 0.4)",
+              backdropFilter: "blur(4px)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               padding: "24px",
               zIndex: 9999,
               overflow: "hidden",
+              animation: "fadeIn 0.2s ease-out",
             }}
             onClick={(e) => {
               if (e.target === e.currentTarget) setShowAdd(false);
@@ -711,12 +714,13 @@ export default function TimelinePageStatic() {
                 width: "clamp(560px, 68vw, 920px)",
                 height: "min(84vh, 760px)",
                 minHeight: "440px",
-                background: "#fff",
-                borderRadius: 16,
-                boxShadow: "0 20px 50px rgba(0,0,0,.25)",
+                background: "#FFFFFF",
+                borderRadius: 20,
+                boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05)",
                 display: "flex",
                 flexDirection: "column",
                 overflow: "hidden",
+                animation: "slideUp 0.3s ease-out",
               }}
               onClick={(e) => e.stopPropagation()}
             >
@@ -727,20 +731,61 @@ export default function TimelinePageStatic() {
                   position: "sticky",
                   top: 0,
                   zIndex: 1,
-                  background: "#fff",
-                  borderBottom: "1px solid #E5E7EB",
+                  background: "linear-gradient(to bottom, #FFFFFF, #FAFBFC)",
+                  borderBottom: "1px solid #F1F5F9",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "space-between",
-                  padding: "12px 16px",
+                  padding: "20px 24px",
                 }}
               >
-                <strong>Nouvel évènement timeline</strong>
-                <div style={{ display: "flex", gap: 8 }}>
-                  <button className="IconBtn" onClick={() => setShowAdd(false)} title="Fermer">
-                    <IconClose />
-                  </button>
+                <div>
+                  <h3 style={{
+                    margin: 0,
+                    fontSize: 20,
+                    fontWeight: 700,
+                    color: "#0F172A",
+                    letterSpacing: "-0.01em"
+                  }}>
+                    Nouvel évènement timeline
+                  </h3>
+                  <p style={{
+                    margin: "4px 0 0",
+                    fontSize: 13,
+                    color: "#64748B",
+                    fontWeight: 400
+                  }}>
+                    Créez une étape, carte ou template
+                  </p>
                 </div>
+                <button
+                  className="IconBtn"
+                  onClick={() => setShowAdd(false)}
+                  title="Fermer"
+                  style={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: 8,
+                    border: "none",
+                    background: "#F8FAFC",
+                    color: "#64748B",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    transition: "all 0.2s ease",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.background = "#F1F5F9";
+                    e.target.style.color = "#334155";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.background = "#F8FAFC";
+                    e.target.style.color = "#64748B";
+                  }}
+                >
+                  <IconClose />
+                </button>
               </div>
 
               {/* corps = seul scroll */}
@@ -749,11 +794,12 @@ export default function TimelinePageStatic() {
                 style={{
                   flex: 1,
                   overflow: "auto",
-                  padding: "14px 16px",
+                  padding: "24px",
                   display: "grid",
-                  gap: 12,
+                  gap: 10,
                   overscrollBehavior: "contain",
                   position: "relative",
+                  background: "#FAFBFC",
                 }}
               >
 
@@ -765,42 +811,97 @@ export default function TimelinePageStatic() {
                     position: "sticky",
                     top: 0,
                     zIndex: 2,
-                    background: "#fff",
-                    padding: "8px 0 10px",
-                    marginBottom: 8,
-                    borderBottom: "1px solid #F1F5F9",
+                    background: "#FAFBFC",
+                    marginBottom: 4,
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 8,
+                    padding: "0 12px",
+                    alignItems: "center",
                   }}
                 >
-                  <div style={{ position: "relative" }}>
-                    <input
-                      className="Input md"
-                      placeholder="Rechercher une étape, une carte ou un template… (ou taper un nouveau nom)"
-                      value={searchQuery}
-                      onChange={(e) => {
-                        setSearchQuery(e.target.value);
-                        setSearchOpen(true);
-                      }}
-                      onFocus={() => setSearchOpen(true)}
-                    />
+                  <div style={{ position: "relative", isolation: "isolate", width: '100%' }}>
+                    <div className="search-bar" 
+                      style={{
+                        border: "2px solid #E2E8F0",
+                        background: '#FFFFFF',
+                         height: 40,
+                         width: '100%',
+                         borderRadius: 8,
+                         boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                         position: 'relative',
+                         display: 'flex',
+                          alignItems: 'center',
+                      }}>
+                        <div style={{width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                          {/* Search Icon */}
+                      <svg
+                        width="18"
+                        height="18"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="#94A3B8"
+                        strokeWidth="2"
+                        style={{
+                          pointerEvents: "none",
+                        }}
+                      >
+                        <circle cx="11" cy="11" r="8" />
+                        <path d="m21 21-4.35-4.35" />
+                      </svg>
+                        </div>
+                      <input
+                        className="Input"
+                        placeholder="Rechercher une étape, une carte ou un template… (ou taper un nouveau nom)"
+                        value={searchQuery}
+                        onChange={(e) => {
+                          setSearchQuery(e.target.value);
+                          setSearchOpen(true);
+                        }}
+                        onFocus={() => setSearchOpen(true)}
+                        style={{
+                          width: "100%",
+                          height: '100%',
+                          fontSize: 15,
+                          padding: "0px",
+                          border: 'none',
+                          boxShadow: 'none',
+                          /* border: "2px solid #E2E8F0", */
+                          background: 'transparent',//'#FFFFFF',
+                          borderRadius: 12,
+                          color: "#0F172A",
+                          outline: "none",
+                          transition: "all 0.2s ease",
+                        }}
+                        onFocusCapture={(e) => {
+                          e.target.parentElement.style.borderColor = "#3B82F6";
+                          e.target.parentElement.style.boxShadow = "0 0 0 3px rgba(59, 130, 246, 0.1)";
+                        }}
+                        onBlurCapture={(e) => {
+                          e.target.parentElement.style.borderColor = "#E2E8F0";
+                          e.target.parentElement.style.boxShadow = "none";
+                        }}
+                      />
+                      
+                    </div>
 
                     {searchOpen && matches?.length > 0 && (
                       <ul
                         className="Dropdown"
                         style={{
                           position: "absolute",
-                          top: "calc(100% + 6px)",
+                          top: "calc(100% + 8px)",
                           left: 0,
                           right: 0,
-                          zIndex: 3,
-                          background: "#fff",
-                          border: "1px solid #E5E7EB",
-                          borderRadius: 10,
-                          padding: 6,
-                          maxHeight: "min(38vh, 260px)",
+                          zIndex: 10,
+                          background: "#FFFFFF",
+                          border: "1px solid #E2E8F0",
+                          borderRadius: 12,
+                          padding: 8,
+                          maxHeight: "min(30vh, 240px)",
                           overflowY: "auto",
                           overscrollBehavior: "contain",
-                          boxShadow: "0 12px 28px rgba(0,0,0,.12)",
-                          willChange: "transform",
+                          boxShadow: "0 12px 28px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.05)",
                         }}
                         onWheel={(e) => e.stopPropagation()}
                         onTouchMove={(e) => e.stopPropagation()}
@@ -818,38 +919,54 @@ export default function TimelinePageStatic() {
                                   width: "100%",
                                   display: "flex",
                                   alignItems: "center",
-                                  gap: 8,
-                                  padding: "8px 10px",
-                                  borderRadius: 6,
-                                  background: "#fff",
+                                  gap: 10,
+                                  padding: "10px 12px",
+                                  borderRadius: 8,
+                                  background: "transparent",
                                   border: "none",
                                   boxShadow: "none",
                                   outline: "none",
-                                  lineHeight: 1.2,
+                                  lineHeight: 1.3,
                                   cursor: "pointer",
+                                  transition: "all 0.15s ease",
+                                }}
+                                onMouseEnter={(e) => {
+                                  e.currentTarget.style.background = "#F8FAFC";
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.background = "transparent";
                                 }}
                               >
                                 <span
                                   style={{
-                                    width: 10,
-                                    height: 10,
+                                    width: 12,
+                                    height: 12,
                                     borderRadius: 999,
                                     background: t.solid,
-                                    border: `1px solid ${t.solid}`,
+                                    border: `2px solid ${t.solid}`,
                                     flex: "0 0 auto",
+                                    boxShadow: `0 0 0 3px ${t.solid}20`,
                                   }}
                                 />
-                                <span style={{ flex: 1, textAlign: "left", color: "#0B1220", fontSize: 14 }}>
+                                <span style={{ flex: 1, textAlign: "left", color: "#0F172A", fontSize: 14, fontWeight: 500 }}>
                                   {opt.label}
                                 </span>
-                                <small style={{ opacity: 0.6, fontSize: 12 }}>
+                                <small style={{
+                                  opacity: 0.7,
+                                  fontSize: 12,
+                                  background: "#F1F5F9",
+                                  padding: "2px 8px",
+                                  borderRadius: 6,
+                                  fontWeight: 600,
+                                  color: "#64748B"
+                                }}>
                                   {opt.kind === "etape"
                                     ? "Étape"
                                     : opt.kind === "template"
-                                    ? `Template${opt.steps_count ? ` • ${opt.steps_count}` : ""}`
-                                    : opt.kind === "card"
-                                    ? "Carte"
-                                    : "Nouveau"}
+                                      ? `Template${opt.steps_count ? ` • ${opt.steps_count}` : ""}`
+                                      : opt.kind === "card"
+                                        ? "Carte"
+                                        : "Nouveau"}
                                 </small>
                               </button>
                             </li>
@@ -863,7 +980,17 @@ export default function TimelinePageStatic() {
                 {/* Formulaires (le type est déduit via recherche/autofill) */}
                 {/* Étape simple (par défaut si rien/nouveau) */}
                 {selectedKind !== "template" && selectedKind !== "card" && (
-                  <div style={{ display: "grid", gap: 12 }}>
+                  <div
+                    style={{
+                      background: "#FFFFFF",
+                      padding: "24px",
+                      borderRadius: 16,
+                      border: "1px solid #E2E8F0",
+                      boxShadow: "0 2px 8px rgba(0, 0, 0, 0.04)",
+                      display: "grid",
+                      gap: 20
+                    }}
+                  >
                     <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
                       <span
                         style={{
@@ -1022,15 +1149,37 @@ export default function TimelinePageStatic() {
                   position: "sticky",
                   bottom: 0,
                   zIndex: 1,
-                  background: "#fff",
-                  borderTop: "1px solid #E5E7EB",
+                  background: "#FAFBFC",
+                  borderTop: "1px solid #F1F5F9",
                   display: "flex",
                   justifyContent: "flex-end",
-                  gap: 8,
-                  padding: "10px 16px",
+                  gap: 12,
+                  padding: "16px 24px",
                 }}
               >
-                <button className="Btn Btn--ghost" onClick={() => setShowAdd(false)}>
+                <button
+                  className="Btn Btn--ghost"
+                  onClick={() => setShowAdd(false)}
+                  style={{
+                    padding: "10px 20px",
+                    fontSize: 14,
+                    fontWeight: 600,
+                    border: "2px solid #E2E8F0",
+                    borderRadius: 10,
+                    background: "#FFFFFF",
+                    color: "#475569",
+                    cursor: "pointer",
+                    transition: "all 0.2s ease",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.background = "#F8FAFC";
+                    e.target.style.borderColor = "#CBD5E1";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.background = "#FFFFFF";
+                    e.target.style.borderColor = "#E2E8F0";
+                  }}
+                >
                   Annuler
                 </button>
                 <button
@@ -1042,8 +1191,61 @@ export default function TimelinePageStatic() {
                     (selectedKind === "card" && (!addTitle.trim() || !addDate)) ||
                     (selectedKind !== "template" && selectedKind !== "card" && (!addTitle.trim() || !addDate))
                   }
+                  style={{
+                    padding: "10px 24px",
+                    fontSize: 14,
+                    fontWeight: 600,
+                    border: "none",
+                    borderRadius: 10,
+                    background: (
+                      busy ||
+                      (selectedKind === "template" && (templatePlan.length === 0 || templatePlan.some((s) => !s.date))) ||
+                      (selectedKind === "card" && (!addTitle.trim() || !addDate)) ||
+                      (selectedKind !== "template" && selectedKind !== "card" && (!addTitle.trim() || !addDate))
+                    )
+                      ? "#E2E8F0"
+                      : "linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)",
+                    color: (
+                      busy ||
+                      (selectedKind === "template" && (templatePlan.length === 0 || templatePlan.some((s) => !s.date))) ||
+                      (selectedKind === "card" && (!addTitle.trim() || !addDate)) ||
+                      (selectedKind !== "template" && selectedKind !== "card" && (!addTitle.trim() || !addDate))
+                    ) ? "#94A3B8" : "#FFFFFF",
+                    cursor: (
+                      busy ||
+                      (selectedKind === "template" && (templatePlan.length === 0 || templatePlan.some((s) => !s.date))) ||
+                      (selectedKind === "card" && (!addTitle.trim() || !addDate)) ||
+                      (selectedKind !== "template" && selectedKind !== "card" && (!addTitle.trim() || !addDate))
+                    ) ? "not-allowed" : "pointer",
+                    transition: "all 0.2s ease",
+                    boxShadow: (
+                      busy ||
+                      (selectedKind === "template" && (templatePlan.length === 0 || templatePlan.some((s) => !s.date))) ||
+                      (selectedKind === "card" && (!addTitle.trim() || !addDate)) ||
+                      (selectedKind !== "template" && selectedKind !== "card" && (!addTitle.trim() || !addDate))
+                    )
+                      ? "none"
+                      : "0 4px 12px rgba(59, 130, 246, 0.3)",
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!e.target.disabled) {
+                      e.target.style.transform = "translateY(-1px)";
+                      e.target.style.boxShadow = "0 6px 16px rgba(59, 130, 246, 0.4)";
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!e.target.disabled) {
+                      e.target.style.transform = "translateY(0)";
+                      e.target.style.boxShadow = "0 4px 12px rgba(59, 130, 246, 0.3)";
+                    }
+                  }}
                 >
-                  Ajouter à la timeline
+                  <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M12 5v14M5 12h14" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    Ajouter à la timeline
+                  </span>
                 </button>
               </div>
             </div>
@@ -1192,6 +1394,356 @@ export default function TimelinePageStatic() {
           </div>
         )}
 
+        {/** modal to add new patient weight (just add weight value and date of calculation) */}
+        {weightModalOpen && (
+          <div
+            className="ModalOverlay"
+            role="dialog"
+            aria-modal="true"
+            style={{
+              position: "fixed",
+              inset: 0,
+              background: "rgba(15, 23, 42, 0.4)",
+              backdropFilter: "blur(4px)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "24px",
+              zIndex: 10000,
+              animation: "fadeIn 0.2s ease-out",
+            }}
+            onClick={(e) => {
+              if (e.target === e.currentTarget) handleCloseWeightModal();
+            }}
+          >
+            <div
+              className="WeightModal"
+              style={{
+                width: "min(440px, 90vw)",
+                background: "#FFFFFF",
+                borderRadius: 20,
+                boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05)",
+                display: "flex",
+                flexDirection: "column",
+                overflow: "hidden",
+                animation: "slideUp 0.3s ease-out",
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div
+                style={{
+                  padding: "24px 28px 20px",
+                  borderBottom: "1px solid #F1F5F9",
+                  background: "linear-gradient(to bottom, #FFFFFF, #FAFBFC)",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  <div>
+                    <h3 style={{
+                      margin: 0,
+                      fontSize: 20,
+                      fontWeight: 700,
+                      color: "#0F172A",
+                      letterSpacing: "-0.01em"
+                    }}>
+                      Ajouter un poids
+                    </h3>
+                    <p style={{
+                      margin: "4px 0 0",
+                      fontSize: 14,
+                      color: "#64748B",
+                      fontWeight: 400
+                    }}>
+                      Enregistrez une nouvelle mesure
+                    </p>
+                  </div>
+                  <button
+                    onClick={handleCloseWeightModal}
+                    style={{
+                      width: 32,
+                      height: 32,
+                      borderRadius: 8,
+                      border: "none",
+                      background: "#F8FAFC",
+                      color: "#64748B",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      transition: "all 0.2s ease",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.background = "#F1F5F9";
+                      e.target.style.color = "#334155";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.background = "#F8FAFC";
+                      e.target.style.color = "#64748B";
+                    }}
+                    title="Fermer"
+                  >
+                    <IconClose />
+                  </button>
+                </div>
+              </div>
+
+              {/* Body */}
+              <div style={{ padding: "28px", display: "flex", flexDirection: "column", gap: 24 }}>
+                {/* Weight Input */}
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  <label
+                    htmlFor="weight-value"
+                    style={{
+                      fontSize: 14,
+                      fontWeight: 600,
+                      color: "#334155",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 6
+                    }}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    Poids (kg)
+                  </label>
+                  <div style={{ position: "relative" }}>
+                    <input
+                      id="weight-value"
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      max="500"
+                      placeholder="Ex: 72.5"
+                      value={weightValue}
+                      onChange={(e) => setWeightValue(e.target.value)}
+                      style={{
+                        width: "100%",
+                        padding: "12px 16px",
+                        fontSize: 15,
+                        border: "2px solid #E2E8F0",
+                        borderRadius: 12,
+                        background: "#FFFFFF",
+                        color: "#0F172A",
+                        outline: "none",
+                        transition: "all 0.2s ease",
+                        fontWeight: 500,
+                      }}
+                      onFocus={(e) => {
+                        e.target.style.borderColor = "#3B82F6";
+                        e.target.style.boxShadow = "0 0 0 3px rgba(59, 130, 246, 0.1)";
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.borderColor = "#E2E8F0";
+                        e.target.style.boxShadow = "none";
+                      }}
+                      autoFocus
+                    />
+                    <span
+                      style={{
+                        position: "absolute",
+                        right: 16,
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        fontSize: 14,
+                        color: "#94A3B8",
+                        fontWeight: 500,
+                        pointerEvents: "none",
+                      }}
+                    >
+                      kg
+                    </span>
+                  </div>
+                </div>
+
+                {/* Date Input */}
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  <label
+                    htmlFor="weight-date"
+                    style={{
+                      fontSize: 14,
+                      fontWeight: 600,
+                      color: "#334155",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 6
+                    }}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      <line x1="16" y1="2" x2="16" y2="6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      <line x1="8" y1="2" x2="8" y2="6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      <line x1="3" y1="10" x2="21" y2="10" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    Date de mesure
+                  </label>
+                  <input
+                    id="weight-date"
+                    type="date"
+                    value={weightDate}
+                    onChange={(e) => setWeightDate(e.target.value)}
+                    style={{
+                      width: "100%",
+                      padding: "12px 16px",
+                      fontSize: 15,
+                      border: "2px solid #E2E8F0",
+                      borderRadius: 12,
+                      background: "#FFFFFF",
+                      color: "#0F172A",
+                      outline: "none",
+                      transition: "all 0.2s ease",
+                      fontWeight: 500,
+                    }}
+                    onFocus={(e) => {
+                      e.target.style.borderColor = "#3B82F6";
+                      e.target.style.boxShadow = "0 0 0 3px rgba(59, 130, 246, 0.1)";
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.borderColor = "#E2E8F0";
+                      e.target.style.boxShadow = "none";
+                    }}
+                  />
+                </div>
+
+                {/* Info Box */}
+                {weightValue && (
+                  <div
+                    style={{
+                      padding: "12px 16px",
+                      background: "#F0F9FF",
+                      border: "1px solid #BAE6FD",
+                      borderRadius: 10,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 10,
+                      animation: "fadeIn 0.2s ease-out",
+                    }}
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0284C7" strokeWidth="2">
+                      <circle cx="12" cy="12" r="10" />
+                      <line x1="12" y1="16" x2="12" y2="12" />
+                      <line x1="12" y1="8" x2="12.01" y2="8" />
+                    </svg>
+                    <span style={{ fontSize: 13, color: "#0369A1", fontWeight: 500 }}>
+                      {parseFloat(weightValue).toFixed(1)} kg sera enregistré pour le {new Date(weightDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Footer */}
+              <div
+                style={{
+                  padding: "20px 28px",
+                  borderTop: "1px solid #F1F5F9",
+                  background: "#FAFBFC",
+                  display: "flex",
+                  gap: 12,
+                  justifyContent: "flex-end",
+                }}
+              >
+                <button
+                  onClick={handleCloseWeightModal}
+                  style={{
+                    padding: "10px 20px",
+                    fontSize: 14,
+                    fontWeight: 600,
+                    border: "2px solid #E2E8F0",
+                    borderRadius: 10,
+                    background: "#FFFFFF",
+                    color: "#475569",
+                    cursor: "pointer",
+                    transition: "all 0.2s ease",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.background = "#F8FAFC";
+                    e.target.style.borderColor = "#CBD5E1";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.background = "#FFFFFF";
+                    e.target.style.borderColor = "#E2E8F0";
+                  }}
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={handleAddWeight}
+                  disabled={!weightValue.trim() || !weightDate}
+                  style={{
+                    padding: "10px 24px",
+                    fontSize: 14,
+                    fontWeight: 600,
+                    border: "none",
+                    borderRadius: 10,
+                    background: !weightValue.trim() || !weightDate
+                      ? "#E2E8F0"
+                      : "linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)",
+                    color: !weightValue.trim() || !weightDate ? "#94A3B8" : "#FFFFFF",
+                    cursor: !weightValue.trim() || !weightDate ? "not-allowed" : "pointer",
+                    transition: "all 0.2s ease",
+                    boxShadow: !weightValue.trim() || !weightDate
+                      ? "none"
+                      : "0 4px 12px rgba(59, 130, 246, 0.3)",
+                  }}
+                  onMouseEnter={(e) => {
+                    if (weightValue.trim() && weightDate) {
+                      e.target.style.transform = "translateY(-1px)";
+                      e.target.style.boxShadow = "0 6px 16px rgba(59, 130, 246, 0.4)";
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (weightValue.trim() && weightDate) {
+                      e.target.style.transform = "translateY(0)";
+                      e.target.style.boxShadow = "0 4px 12px rgba(59, 130, 246, 0.3)";
+                    }
+                  }}
+                >
+                  <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    Ajouter
+                  </span>
+                </button>
+              </div>
+            </div>
+
+            {/* Animations */}
+            <style>{`
+              @keyframes fadeIn {
+                from {
+                  opacity: 0;
+                }
+                to {
+                  opacity: 1;
+                }
+              }
+
+              @keyframes slideUp {
+                from {
+                  opacity: 0;
+                  transform: translateY(20px) scale(0.95);
+                }
+                to {
+                  opacity: 1;
+                  transform: translateY(0) scale(1);
+                }
+              }
+
+              /* Remove spinner from number input */
+              input[type="number"]::-webkit-inner-spin-button,
+              input[type="number"]::-webkit-outer-spin-button {
+                -webkit-appearance: none;
+                margin: 0;
+              }
+              input[type="number"] {
+                -moz-appearance: textfield;
+              }
+            `}</style>
+          </div>
+        )}
+
         {/* ===== Styles locaux ===== */}
         <style>{`
           .TLDateBlack { color:#0B1220 !important; font-weight:600; }
@@ -1241,9 +1793,9 @@ export default function TimelinePageStatic() {
         className="Panel"
         style={{
           gridArea: "charts",
-          marginTop: chartsOpen ? -180 : -40,
-          height: chartsOpen ? 200 : 80,
-          transition: "margin-top .24s ease",
+          marginTop: 10, // karim comment : no need for minus margin since we have gap in parent grid
+          //height: chartsOpen ? 200 : 80,
+          // transition: "margin-top .24s ease", // karim comment no need here for transition
         }}
       >
         <header
@@ -1257,17 +1809,35 @@ export default function TimelinePageStatic() {
           title={chartsOpen ? "Réduire" : "Déplier"}
         >
           <span>charts</span>
-          <button type="button" className="PanelChevron" aria-hidden="true" tabIndex={-1}>
-            <svg width="18" height="18" viewBox="0 0 24 24">
-              <path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-            </svg>
-          </button>
+          <div className="flex items-center gap-2">
+            {/* creation weight instance action button */}
+            <button
+              type="button"
+              className="IconBtn"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleOpenWeightModal();
+              }}
+              aria-label="Ajouter un poids"
+              title="Ajouter un poids"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24">
+                <path d="M12 2v20M2 12h20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              </svg>
+            </button>
+            {/* Chevron Button */}
+            <button onClick={() => { console.log('print'); setChartsOpen(!chartsOpen) }} type="button" className="PanelChevron" aria-hidden="true" tabIndex={-1}>
+              <svg width="18" height="18" viewBox="0 0 24 24">
+                <path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              </svg>
+            </button>
+          </div>
         </header>
 
         <div
           id="charts-content"
           style={{
-            height: chartsOpen ? 350 : 0,
+            //height: chartsOpen ? 350 : 0,
             overflowY: chartsOpen ? "auto" : "hidden",
             transition: "height .24s ease",
           }}
@@ -1284,7 +1854,12 @@ export default function TimelinePageStatic() {
                   placeItems: "center",
                 }}
               >
-                <div>Place ton graphique ici (ex: Recharts)</div>
+                <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  {/* Placeholder for Chart.js chart */}
+                  {chartsOpen && (
+                    <Line data={chartData} options={chartOptions} style={{ width: '100%', height: 'auto' }} />
+                  )}
+                </div>
               </div>
             </div>
           </div>

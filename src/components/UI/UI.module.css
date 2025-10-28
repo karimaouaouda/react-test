@@ -1,0 +1,161 @@
+/* Common UI Components */
+
+/* Panel */
+.panel {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(2, 6, 23, 0.04);
+  overflow: hidden;
+}
+
+.panelCompact .panelHeader {
+  padding: 10px 12px;
+}
+
+.panelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid #e5e7eb;
+  font-weight: 700;
+  text-transform: lowercase;
+  color: #0b1220;
+}
+
+.panelHeaderToggle {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.panelHeaderToggle:hover {
+  background-color: #f8fafc;
+}
+
+.panelChevron {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  transition: transform 0.24s ease;
+}
+
+.panelHeaderToggle.isOpen .panelChevron {
+  transform: rotate(90deg);
+}
+
+/* Buttons */
+.iconBtn {
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 6px 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.iconBtn:hover {
+  background: #e2e8f0;
+}
+
+.iconBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.iconBtnPlus {
+  width: 32px;
+  height: 32px;
+}
+
+.btn {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btn:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btnGhost {
+  background: #fff;
+  color: #0b1220;
+  border: 1px solid #e2e8f0;
+}
+
+.btnGhost:hover:not(:disabled) {
+  background: #f8fafc;
+}
+
+.btnSm {
+  padding: 6px 10px;
+  font-size: 12px;
+}
+
+/* Input */
+.input {
+  width: 100%;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: #fff;
+  font-family: inherit;
+  font-size: 14px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #93c5fd;
+  box-shadow: 0 0 0 3px rgba(147, 197, 253, 0.35);
+}
+
+/* Textarea */
+textarea.input {
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* Charts */
+.chartsArea {
+  padding: 16px;
+  color: #64748b;
+}
+
+.bigChart {
+  height: 300px;
+  border: 1px dashed #e2e8f0;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+}
+
+/* Utility Classes */
+.flexRow {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.gridGap {
+  display: grid;
+  gap: 12px;
+}

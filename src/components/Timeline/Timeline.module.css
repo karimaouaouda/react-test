@@ -1,0 +1,114 @@
+/* Timeline Styles */
+.timeline {
+  --tl-line: #93c5fd;
+}
+
+.timelineContainer {
+  position: relative;
+  height: 70vh;
+  overflow-y: auto;
+  min-height: 0;
+  transition: height 0.24s ease;
+  scrollbar-width: none;
+  padding-top: 0;
+}
+
+.timelineContainer::-webkit-scrollbar {
+  display: none;
+}
+
+/* Timeline Date Styles */
+.tlDateBlack {
+  color: #0b1220 !important;
+  font-weight: 600;
+}
+
+/* Timeline Actions */
+.tlCardActions,
+.tlFlagActions {
+  opacity: 0;
+  transform: translateY(-2px);
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.tlFlagActions {
+  display: inline-flex;
+  gap: 8px;
+  margin-left: 4px;
+}
+
+/* Show actions on hover */
+:global(.vertical-timeline-element-content:hover) .tlCardActions,
+:global(.StepFlagEl:hover) .tlFlagActions {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+/* Timeline Element Content */
+:global(.vertical-timeline.vertical-timeline--two-columns .vertical-timeline-element-content) {
+  width: calc(50% - 10px) !important;
+}
+
+@media (max-width: 1370px) {
+  :global(.vertical-timeline.vertical-timeline--two-columns .vertical-timeline-element-content) {
+    width: 100% !important;
+  }
+}
+
+/* Step Flag Inner */
+.stepFlagInner {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Timeline Card Header */
+.tlCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.tlCardTitle {
+  margin: 0;
+  font-weight: 700;
+}
+
+.tlCardActions {
+  display: flex;
+  gap: 8px;
+}
+
+/* Timeline Images */
+.tlImages {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.tlImageWrapper {
+  position: relative;
+}
+
+.tlImage {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+  display: block;
+}
+
+.tlImageDeleteBtn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  border-radius: 6px;
+}
