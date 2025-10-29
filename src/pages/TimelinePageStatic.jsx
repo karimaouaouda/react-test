@@ -431,11 +431,13 @@ export default function TimelinePageStatic() {
           date: new Date(st.date || addDate),
           color: st.color,
         }));
+
+        console.log("Adding template events:", toPush);
         setTimelineEvents((prev) => {
           const updated = [...prev, ...toPush];
           console.log("Added template events:", toPush);
           console.log("All events after add:", updated);
-          return updated.sort(cmpByEventDateDesc);
+          return updated
         });
       } else if (selectedKind === "card") {
         if (!addTitle.trim() || !addDate) return;
@@ -452,7 +454,7 @@ export default function TimelinePageStatic() {
         setTimelineEvents((prev) => {
           const updated = [...prev, newCard];
           console.log("All events after add:", updated);
-          return updated.sort(cmpByEventDateDesc);
+          return updated
         });
       } else {
         // étape simple (par défaut)
@@ -469,9 +471,11 @@ export default function TimelinePageStatic() {
         setTimelineEvents((prev) => {
           const updated = [...prev, newEtape];
           console.log("All events after add:", updated);
-          return updated.sort(cmpByEventDateDesc);
+          return updated
         });
       }
+
+      setForceRerender((f) => f + 1);
 
       // Reset form
       setShowAdd(false);
@@ -667,7 +671,7 @@ export default function TimelinePageStatic() {
           }}
         >
 
-          <div forceRerender={forceRerender} style={{ padding: forceRerender % 2 === 0 ? '16px' : '8px', boxSizing: 'border-box' }}>
+          <div key={forceRerender} style={{ padding: forceRerender % 2 === 0 ? '16px' : '8px', boxSizing: 'border-box' }}>
             <Timeline
             events={timelineEvents}
             forceRerender={forceRerender}
@@ -1843,10 +1847,12 @@ export default function TimelinePageStatic() {
           }}
         >
           <div style={{ minHeight: 0 }}>
-            <div className="ChartsArea" style={{ padding: 16, color: "#64748B" }}>
+            <div className="ChartsArea">
               <div
                 className="BigChart"
                 style={{
+                  padding: 16,
+                  color: "#64748B",
                   height: 300,
                   border: "1px dashed #E2E8F0",
                   borderRadius: 12,
@@ -1857,7 +1863,7 @@ export default function TimelinePageStatic() {
                 <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   {/* Placeholder for Chart.js chart */}
                   {chartsOpen && (
-                    <Line data={chartData} options={chartOptions} style={{ width: '100%', height: 'auto' }} />
+                    <Line data={chartData} options={chartOptions} style={{ width: '50%', height: 'auto' }} />
                   )}
                 </div>
               </div>
